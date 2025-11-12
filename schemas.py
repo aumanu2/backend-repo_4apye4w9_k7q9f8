@@ -12,9 +12,9 @@ Model name is converted to lowercase for the collection name:
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List, Dict, Any
 
-# Example schemas (replace with your own):
+# Example schemas (kept for reference):
 
 class User(BaseModel):
     """
@@ -38,11 +38,22 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
+# App-specific schemas
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class Dataset(BaseModel):
+    """
+    Datasets uploaded by users
+    Collection name: "dataset"
+    """
+    name: str = Field(..., description="Dataset name provided by user")
+    columns: List[str] = Field(..., description="Column names in the dataset")
+    column_types: Dict[str, str] = Field(..., description="Inferred type per column: string, number, boolean, date")
+    row_count: int = Field(0, ge=0, description="Total number of rows stored")
+
+class Record(BaseModel):
+    """
+    Individual rows for a dataset
+    Collection name: "record"
+    """
+    dataset_id: str = Field(..., description="Reference to Dataset _id as string")
+    data: Dict[str, Any] = Field(..., description="Raw row data as key-value pairs")
